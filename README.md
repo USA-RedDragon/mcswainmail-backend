@@ -1,5 +1,7 @@
 # McSwainMail REST API
 
+[![CircleCI](https://circleci.com/gh/USA-RedDragon/mcswainmail-backend/tree/master.svg?style=svg)](https://circleci.com/gh/USA-RedDragon/mcswainmail-backend/tree/master)
+
 ## Environment Variables
 
 | Environment Variable |                   Details                   |                  Example                   |
