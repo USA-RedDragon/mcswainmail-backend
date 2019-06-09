@@ -16,7 +16,7 @@ module.exports = {
         idle: 10000,
     },
     sync: {
-        force: true,
+        force: false,
         alter: true,
     },
     logging: false,
