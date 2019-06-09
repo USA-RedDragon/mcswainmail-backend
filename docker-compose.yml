@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  mariadb:
+    image: mariadb:10
+    environment:
+      MYSQL_USER: "username"
+      MYSQL_PASSWORD: "password"
+      MYSQL_DATABASE: "servermail"
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - ./database:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  api:
+    image: node:10.15-alpine
+    working_dir: /app
+    environment:
+      DB_HOST: "mariadb"
+    command: npm run start
+    ports:
+      - 3000:3000
+    depends_on:
+      - mariadb
+    volumes:
+      - ./:/app

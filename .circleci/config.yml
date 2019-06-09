@@ -1,0 +1,113 @@
+version: 2.1
+jobs:
+  lint:
+    docker:
+      - image: circleci/node:10.15
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: npm ci
+      - run:
+          name: Lint
+          command: npm run lint -- --format junit --output-file ./testresults/eslint/results.xml
+      - store_test_results:
+          path: testresults
+
+  test:
+    docker:
+      - image: circleci/node:10.15
+      - image: mariadb:10
+        environment:
+          MYSQL_USER: "username"
+          MYSQL_PASSWORD: "password"
+          MYSQL_DATABASE: "servermail"
+          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: npm ci
+      - run:
+          name: Test
+          command: npm run test:ci
+      - store_test_results:
+          path: testresults
+      - run:
+          name: Generate Coverage Report
+          command: npm run coverage
+      - store_artifacts:
+          path: coverage
+      - run:
+          name: Require 75% coverage
+          command: ./node_modules/.bin/nyc report --check-coverage true --lines 75
+
+  build:
+    docker:
+      - image: circleci/node:10.15
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: docker build -t jamcswain/mcswainmail-backend .
+      - run:
+          name: Login to Docker Hub
+          command: echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - run:
+          name: Push Docker Image
+          command: docker push jamcswain/mcswainmail-backend
+
+  deploy:
+    docker:
+      - image: alpine
+
+    working_directory: ~/repo
+
+    steps:
+      - run:
+          name: Install SSH
+          command: apk add --no-cache openssh
+      - add_ssh_keys:
+          fingerprints:
+            - "07:cf:5a:2d:82:00:b3:d8:7e:ff:85:f8:b3:0e:1b:ea"
+      - run:
+          name: Add known_hosts
+          command: echo "$SSH_IP $SSH_SCHEME $SSH_SERVER_KEY" >> ~/.ssh/known_hosts
+      - run:
+          name: Pull Docker images
+          command: ssh $SSH_USERNAME@$SSH_HOSTNAME docker-compose -f mailserver/docker-compose.yml pull
+      - run:
+          name: Bring docker-compose up
+          command: ssh $SSH_USERNAME@$SSH_HOSTNAME docker-compose -f mailserver/docker-compose.yml up -d
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - lint
+      - test
+      - build:
+          requires:
+            - lint
+            - test
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
