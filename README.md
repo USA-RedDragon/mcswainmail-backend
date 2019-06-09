@@ -1,6 +1,6 @@
 # McSwainMail REST API
 
-[![CircleCI](https://circleci.com/gh/USA-RedDragon/mcswainmail-backend/tree/master.svg?style=svg)](https://circleci.com/gh/USA-RedDragon/mcswainmail-backend/tree/master)
+[![CircleCI](https://circleci.com/gh/USA-RedDragon/mcswainmail-backend/tree/master.svg?style=svg)](https://circleci.com/gh/USA-RedDragon/mcswainmail-backend/tree/master) [![jamcswain/mcswainmail-backend](https://images.microbadger.com/badges/image/jamcswain/mcswainmail-backend.svg)](https://microbadger.com/images/jamcswain/mcswainmail-backend "Get your own image badge on microbadger.com")
 
 ## Environment Variables
 
