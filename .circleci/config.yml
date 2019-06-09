@@ -68,7 +68,7 @@ jobs:
           command: docker push jamcswain/mcswainmail-backend
       - run:
           name: Update MicroBadger
-          command: curl s -X POST $MICROBADGER_HOOK
+          command: curl -s -X POST $MICROBADGER_HOOK
 
   deploy:
     docker:
